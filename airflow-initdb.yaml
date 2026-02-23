@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: airflow-initdb
+  namespace: airflow
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: airflow-initdb
+        image: apache/airflow:3.1.7
+        command:
+        - bash
+        - -c
+        - |
+          airflow db migrate
+        envFrom:
+        - configMapRef:
+            name: airflow-config
