@@ -13,6 +13,23 @@ spec:
       labels:
         app: airflow-webserver
     spec:
+      initContainers:
+      - name: git-sync-init
+        image: registry.k8s.io/git-sync/git-sync:v4.2.4
+        env:
+        - name: GITSYNC_REPO
+          value: "https://github.com/nanajich-spec/Dags.git"
+        - name: GITSYNC_ROOT
+          value: "/git"
+        - name: GITSYNC_DEST
+          value: "dags"
+        - name: GITSYNC_BRANCH
+          value: "main"
+        - name: GITSYNC_ONE_TIME
+          value: "true"
+        volumeMounts:
+        - name: dags
+          mountPath: /git
       containers:
       - name: airflow-webserver
         image: apache/airflow:3.1.7
@@ -22,16 +39,34 @@ spec:
         - exec airflow api-server
         ports:
         - containerPort: 8080
+        env:
+        - name: AIRFLOW__CORE__DAGS_FOLDER
+          value: "/git/Dags.git"
         envFrom:
         - configMapRef:
             name: airflow-config
         volumeMounts:
         - name: dags
-          mountPath: /opt/airflow/dags
+          mountPath: /git
+      - name: git-sync
+        image: registry.k8s.io/git-sync/git-sync:v4.2.4
+        env:
+        - name: GITSYNC_REPO
+          value: "https://github.com/nanajich-spec/Dags.git"
+        - name: GITSYNC_ROOT
+          value: "/git"
+        - name: GITSYNC_DEST
+          value: "dags"
+        - name: GITSYNC_BRANCH
+          value: "main"
+        - name: GITSYNC_PERIOD
+          value: "10s"
+        volumeMounts:
+        - name: dags
+          mountPath: /git
       volumes:
       - name: dags
-        persistentVolumeClaim:
-          claimName: airflow-dags
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
