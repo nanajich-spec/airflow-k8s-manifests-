@@ -27,6 +27,10 @@ spec:
           value: "10s"
         - name: GITSYNC_ONE_TIME
           value: "false"
+        - name: GITSYNC_BRANCH
+          value: "main"
+        - name: GITSYNC_MAX_FAILURES
+          value: "0"
         volumeMounts:
         - name: dags
           mountPath: /dags
