@@ -52,6 +52,8 @@ spec:
         volumeMounts:
         - name: dags
           mountPath: /git
+        - name: logs
+          mountPath: /opt/airflow/logs
       - name: git-sync
         image: registry.k8s.io/git-sync/git-sync:v4.2.4
         env:
@@ -71,3 +73,6 @@ spec:
       volumes:
       - name: dags
         emptyDir: {}
+      - name: logs
+        persistentVolumeClaim:
+          claimName: airflow-logs
