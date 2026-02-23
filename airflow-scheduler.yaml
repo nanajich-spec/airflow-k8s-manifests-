@@ -36,13 +36,15 @@ spec:
         command:
         - airflow
         - scheduler
+        env:
+        - name: AIRFLOW__CORE__DAGS_FOLDER
+          value: "/git/Dags.git"
         envFrom:
         - configMapRef:
             name: airflow-config
         volumeMounts:
         - name: dags
-          mountPath: /opt/airflow/dags
-          subPath: Dags.git
+          mountPath: /git
       - name: git-sync
         image: registry.k8s.io/git-sync/git-sync:v4.2.4
         env:
