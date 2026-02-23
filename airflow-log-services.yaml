@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: airflow-scheduler-headless
+  namespace: airflow
+spec:
+  clusterIP: None
+  selector:
+    app: airflow-scheduler
+  ports:
+  - name: logs
+    port: 8793
+    targetPort: 8793
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: airflow-worker-headless
+  namespace: airflow
+spec:
+  clusterIP: None
+  selector:
+    app: airflow-worker
+  ports:
+  - name: logs
+    port: 8793
+    targetPort: 8793
