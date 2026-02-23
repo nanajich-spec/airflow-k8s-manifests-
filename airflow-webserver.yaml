@@ -25,6 +25,14 @@ spec:
         envFrom:
         - configMapRef:
             name: airflow-config
+        volumeMounts:
+        - name: dags
+          mountPath: /opt/airflow/dags
+          subPath: repo
+      volumes:
+      - name: dags
+        persistentVolumeClaim:
+          claimName: airflow-dags
 ---
 apiVersion: v1
 kind: Service
