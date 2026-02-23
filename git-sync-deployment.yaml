@@ -21,8 +21,6 @@ spec:
           value: "https://github.com/nanajich-spec/Dags.git"
         - name: GITSYNC_ROOT
           value: "/dags"
-        - name: GITSYNC_LINK
-          value: "current"
         - name: GITSYNC_PERIOD
           value: "10s"
         - name: GITSYNC_ONE_TIME

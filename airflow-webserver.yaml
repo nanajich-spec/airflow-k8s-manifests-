@@ -28,7 +28,6 @@ spec:
         volumeMounts:
         - name: dags
           mountPath: /opt/airflow/dags
-          subPath: current
       volumes:
       - name: dags
         persistentVolumeClaim:
