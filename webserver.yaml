@@ -20,7 +20,7 @@ spec:
         command:
         - bash
         - -c
-        - exec airflow api-server
+        - exec airflow webserver
         ports:
         - containerPort: 8080
         envFrom:
