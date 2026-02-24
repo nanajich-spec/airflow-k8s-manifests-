@@ -28,7 +28,42 @@ spec:
         - -c
         - |
           airflow db migrate
-          echo "Database migration completed successfully!"
+          
+          # Create admin user using Python with FAB
+          python3 << 'PYTHON_EOF'
+          from airflow.www.app import create_app
+          from flask import Flask
+          
+          app = create_app()
+          with app.app_context():
+              from airflow.www.fab_security.manager import SecurityManager
+              appbuilder = app.appbuilder
+              
+              # Check if admin exists
+              admin_user = appbuilder.sm.find_user(username='admin')
+              
+              if not admin_user:
+                  # Create admin role if it doesn't exist
+                  admin_role = appbuilder.sm.find_role('Admin')
+                  
+                  # Create admin user
+                  appbuilder.sm.add_user(
+                      username='admin',
+                      first_name='Admin',
+                      last_name='User',
+                      email='admin@example.com',
+                      role=admin_role,
+                      password='admin'
+                  )
+                  print("Admin user created: admin/admin")
+              else:
+                  # Update password
+                  admin_user.password = 'admin'
+                  appbuilder.sm.update_user(admin_user)
+                  print("Admin password updated: admin/admin")
+          PYTHON_EOF
+          
+          echo "Database initialization completed successfully!"
         envFrom:
         - configMapRef:
             name: airflow-config
