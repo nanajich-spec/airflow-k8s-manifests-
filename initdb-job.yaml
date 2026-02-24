@@ -22,7 +22,7 @@ spec:
           echo "PostgreSQL is ready!"
       containers:
       - name: airflow-initdb
-        image: apache/airflow:3.1.7
+        image: apache/airflow:2.10.2
         command:
         - bash
         - -c
