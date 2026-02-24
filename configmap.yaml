@@ -28,6 +28,8 @@ data:
   # Security
   AIRFLOW__CORE__FERNET_KEY: "aHLJUzwHfStAYmXZ8gOe_PUyaLf1qaDq8WfhKJ-QlA8="
   AIRFLOW__WEBSERVER__SECRET_KEY: "aHLJUzwHfStAYmXZ8gOe_PUyaLf1qaDq8WfhKJ-QlA8="
+  _AIRFLOW_WWW_USER_USERNAME: "admin"
+  _AIRFLOW_WWW_USER_PASSWORD: "admin"
   
   # Logging
   AIRFLOW__LOGGING__BASE_LOG_FOLDER: "/opt/airflow/logs"
