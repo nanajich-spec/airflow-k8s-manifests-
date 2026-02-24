@@ -1,50 +1,41 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: airflow-triggerer
+  name: airflow-dag-processor
   namespace: airflow
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: airflow-triggerer
+      app: airflow-dag-processor
   template:
     metadata:
       labels:
-        app: airflow-triggerer
+        app: airflow-dag-processor
     spec:
-      initContainers:
-      - name: git-sync-init
-        image: registry.k8s.io/git-sync/git-sync:v4.2.4
-        env:
-        - name: GITSYNC_REPO
-          value: "https://github.com/nanajich-spec/Dags.git"
-        - name: GITSYNC_ROOT
-          value: "/git"
-        - name: GITSYNC_DEST
-          value: "dags"
-        - name: GITSYNC_BRANCH
-          value: "main"
-        - name: GITSYNC_ONE_TIME
-          value: "true"
-        volumeMounts:
-        - name: dags
-          mountPath: /git
+      serviceAccountName: airflow
       containers:
-      - name: airflow-triggerer
+      - name: airflow-dag-processor
         image: apache/airflow:3.1.7
         command:
-        - airflow
-        - triggerer
-        env:
-        - name: AIRFLOW__CORE__DAGS_FOLDER
-          value: "/git/Dags.git"
+        - bash
+        - -c
+        - exec airflow dag-processor
         envFrom:
         - configMapRef:
             name: airflow-config
         volumeMounts:
         - name: dags
-          mountPath: /git
+          mountPath: /opt/airflow/dags
+        - name: logs
+          mountPath: /opt/airflow/logs
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
       - name: git-sync
         image: registry.k8s.io/git-sync/git-sync:v4.2.4
         env:
@@ -58,9 +49,14 @@ spec:
           value: "main"
         - name: GITSYNC_PERIOD
           value: "10s"
+        - name: GITSYNC_LINK
+          value: "current"
         volumeMounts:
         - name: dags
           mountPath: /git
       volumes:
       - name: dags
         emptyDir: {}
+      - name: logs
+        persistentVolumeClaim:
+          claimName: airflow-logs

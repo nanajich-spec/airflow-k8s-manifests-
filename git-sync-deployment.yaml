@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git-sync
+  namespace: airflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: git-sync
+  template:
+    metadata:
+      labels:
+        app: git-sync
+    spec:
+      containers:
+      - name: git-sync
+        image: registry.k8s.io/git-sync/git-sync:v4.2.4
+        env:
+        - name: GITSYNC_REPO
+          value: "https://github.com/nanajich-spec/Dags.git"
+        - name: GITSYNC_ROOT
+          value: "/git"
+        - name: GITSYNC_DEST
+          value: "dags"
+        - name: GITSYNC_BRANCH
+          value: "main"
+        - name: GITSYNC_PERIOD
+          value: "10s"
+        volumeMounts:
+        - name: dags
+          mountPath: /git
+      volumes:
+      - name: dags
+        persistentVolumeClaim:
+          claimName: airflow-dags

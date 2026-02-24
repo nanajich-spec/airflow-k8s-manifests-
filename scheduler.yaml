@@ -13,40 +13,29 @@ spec:
       labels:
         app: airflow-scheduler
     spec:
-      initContainers:
-      - name: git-sync-init
-        image: registry.k8s.io/git-sync/git-sync:v4.2.4
-        env:
-        - name: GITSYNC_REPO
-          value: "https://github.com/nanajich-spec/Dags.git"
-        - name: GITSYNC_ROOT
-          value: "/git"
-        - name: GITSYNC_DEST
-          value: "dags"
-        - name: GITSYNC_BRANCH
-          value: "main"
-        - name: GITSYNC_ONE_TIME
-          value: "true"
-        volumeMounts:
-        - name: dags
-          mountPath: /git
+      serviceAccountName: airflow
       containers:
       - name: airflow-scheduler
         image: apache/airflow:3.1.7
         command:
-        - airflow
-        - scheduler
-        env:
-        - name: AIRFLOW__CORE__DAGS_FOLDER
-          value: "/git/Dags.git"
+        - bash
+        - -c
+        - exec airflow scheduler
         envFrom:
         - configMapRef:
             name: airflow-config
         volumeMounts:
         - name: dags
-          mountPath: /git
+          mountPath: /opt/airflow/dags
         - name: logs
           mountPath: /opt/airflow/logs
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
       - name: git-sync
         image: registry.k8s.io/git-sync/git-sync:v4.2.4
         env:
@@ -60,12 +49,15 @@ spec:
           value: "main"
         - name: GITSYNC_PERIOD
           value: "10s"
+        - name: GITSYNC_LINK
+          value: "current"
         volumeMounts:
         - name: dags
           mountPath: /git
       volumes:
       - name: dags
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: airflow-dags
       - name: logs
         persistentVolumeClaim:
           claimName: airflow-logs
